@@ -23,7 +23,7 @@
   },
 
   "git_source": {
-    "git_url": "https://github.com/cleberzumba/medallion-scd-pyspark",
+    "git_url": "https://github.com/cleberzumba/medallion-scd-azure-databricks-delta",
     "git_provider": "gitHub",
     "git_branch": "main"
   },
@@ -33,7 +33,7 @@
       "task_key": "bronze_ingestion",
       "description": "Auto Loader ingests JSON customers, Parquet orders and CSV products from the ADLS Gen2 raw zone into Bronze Delta tables. Uses trigger(availableNow) — processes all new files, then stops.",
       "spark_python_task": {
-        "python_file": "etl_autoloader.py",
+        "python_file": "3-etl_autoloader.py",
         "source": "GIT"
       },
       "environment_key": "default",
@@ -50,7 +50,7 @@
         { "task_key": "bronze_ingestion" }
       ],
       "spark_python_task": {
-        "python_file": "etl.py",
+        "python_file": "4-etl.py",
         "source": "GIT"
       },
       "environment_key": "default",
