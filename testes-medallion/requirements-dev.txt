@@ -1,5 +1,0 @@
-# Local / CI test dependencies (not needed on Databricks).
-# Spark needs Java 17+. delta-spark must match the pyspark minor version.
-pyspark==4.0.1
-delta-spark==4.0.0
-pytest>=8
