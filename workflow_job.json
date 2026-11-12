@@ -1,6 +1,6 @@
 {
   "name": "medallion_scd_pipeline",
-  "description": "End-to-end Medallion pipeline on Azure Databricks: Bronze ingestion via Auto Loader (JSON/Parquet/CSV) followed by Silver and Gold transformations with SCD Type 1 and Type 2. Runs on serverless compute.",
+  "description": "End-to-end Medallion pipeline on Azure Databricks: Bronze ingestion via Auto Loader (JSON/Parquet/CSV), Silver with SCD Type 1 and Type 2, Gold business aggregations, then Delta table maintenance. Runs on serverless compute.",
 
   "email_notifications": {
     "on_failure": ["cleberz21@gmail.com"],
@@ -44,13 +44,44 @@
     },
 
     {
-      "task_key": "silver_gold_transformations",
-      "description": "Silver: cleansing, SCD Type 1 and Type 2 dimensions, orders fact table. Gold: sales by city, sales by category, customer ranking.",
+      "task_key": "silver_transformations",
+      "description": "Silver: cleansing and typing, SCD Type 1 and Type 2 customer dimensions, SCD Type 2 product dimension, orders fact table. Batches are processed one at a time in chronological order.",
       "depends_on": [
         { "task_key": "bronze_ingestion" }
       ],
       "spark_python_task": {
-        "python_file": "4-etl.py",
+        "python_file": "4-silver.py",
+        "source": "GIT"
+      },
+      "environment_key": "default",
+      "timeout_seconds": 1800,
+      "max_retries": 0
+    },
+
+    {
+      "task_key": "gold_aggregations",
+      "description": "Gold: sales by city, sales by category, customer ranking. Rebuilt with overwrite, so it is safe to retry or repair on its own.",
+      "depends_on": [
+        { "task_key": "silver_transformations" }
+      ],
+      "spark_python_task": {
+        "python_file": "5-gold.py",
+        "source": "GIT"
+      },
+      "environment_key": "default",
+      "timeout_seconds": 900,
+      "max_retries": 2,
+      "min_retry_interval_millis": 60000
+    },
+
+    {
+      "task_key": "table_maintenance",
+      "description": "OPTIMIZE + ZORDER on Silver, OPTIMIZE on Bronze, VACUUM (7-day retention) on every table.",
+      "depends_on": [
+        { "task_key": "gold_aggregations" }
+      ],
+      "spark_python_task": {
+        "python_file": "6-maintenance.py",
         "source": "GIT"
       },
       "environment_key": "default",
