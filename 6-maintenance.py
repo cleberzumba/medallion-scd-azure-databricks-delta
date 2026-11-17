@@ -26,10 +26,6 @@ from pyspark.sql import SparkSession
 CATALOG = "medallion"
 SCHEMA  = "medallion_scd"
 
-# Regex used to extract the batch key from the source file name recorded in
-# Bronze. Matches the YYYY-MM segment of names like "customers_2026-01.json".
-BATCH_KEY_PATTERN = r"(\d{4}-\d{2})"
-
 
 def get_spark():
     """

@@ -114,13 +114,6 @@ def run_silver(spark, silver):
 # =========================================================
 # Batch discovery
 # =========================================================
-@pytest.mark.xfail(
-    strict=True,
-    reason="Known bug: BATCH_KEY_PATTERN is inserted into a SQL string literal "
-           "as '\\d', which Spark SQL unescapes to 'd', so regexp_extract never "
-           "matches and discover_batches() raises. Fix: write the pattern as "
-           "r\"(\\\\d{4}-\\\\d{2})\" or pass it without going through SQL.",
-)
 def test_discover_batches_returns_batches_in_chronological_order(spark, silver, bronze):
     assert silver.discover_batches(spark) == BATCHES
 
